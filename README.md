@@ -1,12 +1,17 @@
 # skills
 
-Personal Hermes agent skills (`SKILL.md` + references, same layout as `~/.skills/`).
+Personal skills for my Hermes agent. Layout mirrors `~/.skills/` — `category/skill-name/{SKILL.md,references/}`.
 
 ## Install
-Clone into your skills directory:
+Clone and copy the categories/skills you want into your skills directory:
 
-    git clone git@github.com:0xZ0uk/skills.git skills
-    cp -r skills/gaming/blender-fps-rigging ~/.skills/gaming/
+    git clone git@github.com:0xZ0uk/skills.git ~/tmp-skills
+    cp -r ~/tmp-skills/devops ~/.skills/
+    rm -rf ~/tmp-skills
 
-## Skills
-- **gaming/blender-fps-rigging** — Rig/skin FPS arms & guns in Blender, animate idle/walk/fire/reload, export FBX to Unity/UE5. (Source: David Stenfors' 25-part YouTube course)
+## Contents
+- **devops/dokploy-deploy** — deploying services on Dokploy (dash.blugg.pt): API quirks, compose pitfalls, GHCR pull fix
+- **devops/proxmox-homelab-ops** — operating the Proxmox host (pve)
+- **game-dev/blender-fps-rigging** — rig/skin FPS arms & guns in Blender, animate idle/walk/fire/reload, FBX export to Unity/UE5 (source: David Stenfors' 25-part course)
+- **github/** — gh CLI workflows: auth, PRs, issues, repo management, code review, safe-git-sync
+- **seo/** — seo-audit, seo-report, keyword-research, competitor-analysis (Porta443 SEO pipeline)
