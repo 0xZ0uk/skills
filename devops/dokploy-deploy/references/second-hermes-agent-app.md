@@ -1,6 +1,6 @@
 # A second Hermes Agent as its own Dokploy app
 
-Pattern for running another Hermes agent (a scoped, different-audience agent — see the `hermes-agent` skill's `references/multi-profile-and-distributions.md`) beside the main one, as an independent Dokploy compose app rather than a second profile in the same container.
+Pattern for running another Hermes agent (a scoped, different-audience agent — see the `hermes-agent` skill bundled with Hermes, `references/multi-profile-and-distributions.md`) beside the main one, as an independent Dokploy compose app rather than a second profile in the same container.
 
 Verified 2026-10-04 by deploying an agent for a panel's tenants.
 
@@ -59,17 +59,16 @@ services:
 
 ## Deploy sequence (API)
 
-1. `POST /api/compose.create` — `{name, description, environmentId, composeType: "docker-compose"}` → returns `composeId`. The auto-generated `appName` (`compose-generate-…`) appears to be immutable after creation, so the container name will be `<appName>-<service>-1`; set `appName` at create time if the name matters.
-2. `POST /api/compose.update` — `{composeId, sourceType: "raw", composeType: "docker-compose", composeFile}`.
-3. `POST /api/compose.saveEnvironment` — `{composeId, env}`.
-4. `POST /api/compose.deploy` — `{composeId}`; poll `compose.one.composeStatus` until `done`.
-5. Read back with `compose.one`: confirm `sourceType=raw`, the `composeFile` contains your service, and `env` came back.
+Follow the raw-compose recipe in SKILL.md. Specific to this app:
 
-Idempotency: scan `project.all` for the compose `name` first and reuse the `composeId` rather than creating duplicates.
+- `appName` is effectively immutable after `compose.create`: omit it and Dokploy generates `compose-generate-…`; pass one and it still gets a random suffix. Container names follow it (`<appName>-<service>-1`), so pass a meaningful `appName` at create time.
+- No domain step — nothing is served.
+- Read back with `compose.one`: `sourceType=raw`, the `composeFile` contains your service, and `env` is non-empty.
+- Idempotency: scan `project.all` for the compose `name` first and reuse its `composeId` rather than creating a duplicate.
 
 ## Seeding the home from inside another container
 
-You usually author the agent in one container and need its files at a host path the new app will mount. I"'"'s easier than it looks: bind both host paths into a throwaway `alpine` and copy between them, since the docker daemon resolves the sources.
+You usually author the agent in one container and need its files at a host path the new app will mount. It's easier than it looks: bind both host paths into a throwaway `alpine` and copy between them, since the docker daemon resolves the sources.
 
 ```bash
 docker run --rm -v /srv/main/root/.hermes:/src:ro -v /srv/<app>:/x alpine sh -c '

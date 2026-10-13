@@ -1,6 +1,6 @@
 ---
 name: seo-audit
-description: "Audit a website, investigate its real search opportunities, and deliver a short data-backed report on the few changes most likely to grow organic traffic that converts."
+description: "Audit a website's SEO with OpenSEO: crawl it, read its page families, run live ranking checks, and deliver a short data-backed report on the one to three changes most likely to grow organic traffic that converts. Use when asked for an SEO audit, site review, why a site isn't ranking, or what to fix first for organic growth — especially for a shareable, non-expert report."
 ---
 
 # OpenSEO SEO Audit
@@ -9,35 +9,27 @@ description: "Audit a website, investigate its real search opportunities, and de
 
 Find the work that would most improve a site's useful organic traffic, then explain it so a non-expert can act on it. Research broadly; recommend selectively. The report leads with one to three recommendations that either capture meaningfully more qualified search demand or stop a real loss.
 
-Use this when asked for an SEO audit or review of a domain, especially for a shareable report. For expert-facing analysis of a competitor or market, use `competitor-analysis` or `competitive-landscape` instead.
+Use this when asked for an SEO audit or review of a domain, especially for a shareable report. For expert-facing analysis of a named competitor, use `competitor-analysis` instead.
 
 ## Inputs and project context
 
+- **Load `seo-report` first.** Its `references/openseo-access.md` has the Executor call shape, account constants, and the project-context rules (read context first, fill missing fields inline, research-log length cap). Deliver through it, saving with `skill: "seo-audit"`; if it is unavailable, say so and stop before writing HTML.
 - Domain to audit and `projectId` (`list_projects`; if no project matches, `create_project`).
-- Call `get_project_context` first. This skill needs `business_overview`. If it is empty, infer what the business does from the site, confirm it with the user in one question, write it back with `update_project_context`, and continue. Suggest `seo-project-setup` at the end for the rest; never front-load the full interview.
+- This skill needs `business_overview`. If it is empty, infer what the business does from the site, confirm it with the user in one question, write it back, and continue.
 - Reuse research-log results under 30 days old for discovery. A ranking claim that drives a recommendation still needs a live check made during this audit.
-- On finish, write back what is durable with `update_project_context` (a corrected `business_overview`, the pages the report names via `addKeyPages`) and append `{ appendResearchLog: { summary: "Site audit: <domain>. Verdict: <conclusion>" } }`.
+- On finish, write back what is durable (a corrected `business_overview`, the pages the report names via `addKeyPages`) and log `Site audit: <domain>. Verdict: <conclusion>`.
 
-Deliver through the `seo-report` skill, saving with `skill: "seo-audit"`. If that skill is unavailable, say so and stop before writing HTML.
+## Tools
 
-## OpenSEO access — through Executor, never a direct MCP
-
-OpenSEO is not a Hermes MCP server. Do not run `hermes mcp add`, do not edit
-`mcp_servers`, do not check `hermes mcp list`. Every OpenSEO call runs inside the
-Executor MCP via `mcp__executor__execute` (see the `executor-mcp` skill):
-
-```typescript
-const A = 'acc_0b91f591-6feb-4f77-b31b-be43e921b826';
-const B = 'openseo-so.profiles.ins_140ec4c7-3799-4b0d-9802-0d565f87ff7c.';
-const r = await tools[B + 'whoami']({ accountId: A, input: {} });
-const credits = r.content[0].text;
-```
-
-- `whoami`: confirm credits before spending. If it fails, the problem is Executor — never tell the user to "connect OpenSEO".
+- `whoami`: confirm credits before spending (failure = Executor problem, see `openseo-access.md`).
 - `run_site_audit`, then `get_audit_status` (wait a minute or two between checks), `get_audit_issues`, `get_audit_pages`. Leave Lighthouse off unless the user asked for performance depth. Crawl reads are free.
 - `get_backlinks_overview` and `get_domain_overview`: orientation only. Provider traffic and keyword counts are estimates with no single observation date; they are not measured visits.
 - `get_ranked_keywords`: which queries send which pages traffic. Start with one domain-level call with `resultTypes: ["organic"]`; use `scope: "exact_url"` for the specific pages you compare. A page missing from a limited domain sample is not proof it has no rankings. Ranking rows carry their own `last_updated_time`; keyword metric dates are not ranking dates.
-- `get_serp_results` — call shape `input: { projectId, queries: [{ keyword, locationCode, languageCode }], depth: 20 }` (array of objects, not strings; explicit depth). ~5 credits per keyword. Parse the `rank | domain | title | url` lines inside the SAME `execute` call, because Executor does not persist variables between programs and a second call re-pays for the SERP. `google.com/searchviewer` rows are Google's ad/related blocks — filter them and count organic yourself. Competitors, live check behind every ranking claim in the report. The returned `rank` counts every result block, so count organic (unpaid) listings yourself and report the spot with its page, ten spots per page: "#10 (page 1)", "#11 (page 2)". Request depth 20; a page not seen is "not in the first 20 results". Record the exact query, country, language, date, how many organic listings came back, and the matching URL; those details go in the evidence appendix, not the tables. A failed lookup is unknown, not "not in the first 20 results".
+- `get_serp_results`: the live check behind every ranking claim in the report, ~5 credits per keyword.
+  - Call shape: `input: { projectId, queries: [{ keyword, locationCode, languageCode }], depth: 20 }` — an array of objects, not strings, with explicit depth. Parse results in the same `execute` call.
+  - The returned `rank` counts every result block. Drop `google.com/searchviewer` rows (Google's ad/related blocks), count organic listings yourself, and report the spot with its page, ten per page: "#10 (page 1)", "#11 (page 2)".
+  - A page not seen at depth 20 is "not in the first 20 results"; a failed lookup is unknown, not "not in the first 20 results".
+  - Record query, country, language, date, organic listings returned, and the matching URL — in the evidence appendix, not the tables.
 - `get_search_console_performance`: when connected, first-party clicks and impressions separate low visibility from low click-through. Missing access is a coverage gap, not a blocker.
 - `get_keyword_metrics` and `research_keywords`: demand for the queries a candidate page targets. One focused metrics batch usually suffices; one research call with 1–3 seeds when a demand gap could change the decision.
 - Web reading (fetch, scrape, or search): the site's own pages, sitemap, the leading results for a query, and competitor pages.
@@ -102,7 +94,7 @@ Draft the report body (markdown or HTML, not yet saved). Give the reviewer (a se
 
 Use the title conventions in `seo-report`. Sections, in order:
 
-1. **Your next SEO move**: two or three bullets. First action, next action if any, and what is already working. These bullets replace the starter template's opening paragraph and its closing "What to do next" section; include neither.
+1. **Your next SEO move**: two or three bullets. First action, next action if any, and what is already working. These bullets replace the starter template's opening bullets and its closing "What to do next" section; include neither.
 2. **Recommendations**: one to three, in priority order. Each is an `h3` naming the action and the page or small group, then:
    - **Do this**: two to four bullets. Start with a verb, name what changes, link the page.
    - **Why**: two to four bullets. The observed gap, who searches and why they matter, the plausible benefit, the main uncertainty. Benefit and confidence stay together.
@@ -142,8 +134,7 @@ Skeleton for one recommendation and the checked table (keep the `seo-report` CSS
 
 ## Guardrails
 
-- Calm, plain tone. No exclamation points, drama words, or filler; no em dashes in prose (the report title convention in `seo-report` is the exception). Severity words only where literally true.
-- Gloss each term of art in plain English on first use: canonical, meta description, crawler, 301, structured data.
+- Beyond `seo-report`'s plain-language rules: no em dashes in prose (its title convention is the exception), and severity words only where literally true.
 - Observations are not causes. Similar content plus uneven rankings, a crawler warning, or missing provider rows never prove a penalty, an indexing exclusion, or the reason a page ranks where it does.
 - Retrieval date is not observation date. Say when a ranking was observed, or say unknown.
 - Missing backlink or ranking data means "no recorded data", not a problem.

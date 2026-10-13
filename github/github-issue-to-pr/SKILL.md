@@ -1,6 +1,6 @@
 ---
 name: github-issue-to-pr
-description: "Carry a GitHub issue to a verified PR with honest CI state."
+description: "Carry a GitHub issue end-to-end to a verified pull request: read the full thread, sweep for duplicate PRs, validate the premise against current code and design intent, fix the whole bug class, prove the regression test fails without the fix, and report CI state honestly. Use when asked to fix/implement issue #N, take a bug from issue to green CI, or open a PR for a GitHub issue."
 version: 0.1.0
 author: Ben Barclay (benbarclay), Hermes Agent
 license: MIT
@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [GitHub, Issues, Coding, Pull-Requests, CI]
-    related_skills: [github-issues, github-pr-workflow, systematic-debugging, test-driven-development, requesting-code-review]
+    related_skills: [github-auth, github-gh-pitfalls, safe-git-sync]
 ---
 
 # GitHub Issue to Pull Request
@@ -27,7 +27,7 @@ Don't use for: reviewing an existing PR, or answering a code question with no re
 
 ### 1. Read the live issue — body AND full thread
 
-Use `terminal` to run `gh issue view <N> --comments`. The body is a snapshot from filing time; the newest comments carry the live state: partial fixes already merged, new root-cause analyses, maintainer decisions, or questions directed at you that change the task. Also read repository instructions (`AGENTS.md`, contribution docs) with `read_file`. Done when the currently requested behavior, non-goals, and any unanswered thread questions are known.
+Run `gh issue view <N> --comments`. The body is a snapshot from filing time; the newest comments carry the live state: partial fixes already merged, new root-cause analyses, maintainer decisions, or questions directed at you that change the task. Also read repository instructions (`AGENTS.md`, contribution docs). Done when the currently requested behavior, non-goals, and any unanswered thread questions are known.
 
 ### 2. Sweep for existing and duplicate work
 
@@ -35,7 +35,7 @@ Before writing anything, run `gh pr list --search "#<N>" --state all` plus at le
 
 ### 3. Validate the premise against current code — and against design intent
 
-Reproduce the bug or demonstrate the missing behavior on the current default branch with a failing test or fixture, using `search_files` and `read_file` to trace the reported path. Then check the second question: is the "bug" actually deliberate design? Run `git log -p -S "<symbol>"` on the code the issue wants changed and read the original commit's intent — a missing link or restriction is often the feature. Challenge stale or flawed issue prose instead of implementing it blindly. Done when the root cause or feature gap is demonstrated in current code AND the change doesn't fight an intentional design.
+Reproduce the bug or demonstrate the missing behavior on the current default branch with a failing test or fixture, tracing the reported path through the code. Then check the second question: is the "bug" actually deliberate design? Run `git log -p -S "<symbol>"` on the code the issue wants changed and read the original commit's intent — a missing link or restriction is often the feature. Challenge stale or flawed issue prose instead of implementing it blindly. Done when the root cause or feature gap is demonstrated in current code AND the change doesn't fight an intentional design.
 
 ### 4. Define acceptance and risk
 
@@ -43,25 +43,15 @@ List acceptance criteria, interfaces, migrations/state changes, compatibility, s
 
 ### 5. Implement the smallest complete change — and fix the class
 
-Work on an isolated branch or worktree, loading `systematic-debugging` or `test-driven-development` when the bug class calls for them. Add regression tests first, then implement. When the fix is in hand, `search_files` for the same bug shape at sibling call sites and fix the whole class in this PR — an incomplete fix that leaves known siblings broken is worse than none. Every changed line must trace to the issue; no drive-by cleanup. Done when targeted tests pass, the original failure no longer reproduces, and sibling sites are fixed or explicitly ruled out.
+Work on an isolated branch or worktree. Add regression tests first, then implement. When the fix is in hand, search for the same bug shape at sibling call sites and fix the whole class in this PR — an incomplete fix that leaves known siblings broken is worse than none. Every changed line must trace to the issue; no drive-by cleanup. Done when targeted tests pass, the original failure no longer reproduces, and sibling sites are fixed or explicitly ruled out.
 
-### 6. Prove the regression test bites (sabotage run)
+### 6. Prove the regression test bites — locally and where CI runs
 
-Temporarily restore the old behavior of the exact function under test, run the new test, and confirm it FAILS; then restore the fix and confirm it passes. A regression test that passes with and without the fix proves nothing. Done when the test demonstrably fails on pre-fix code.
-
-### 6. Prove it where CI proves it (sabotage runs, CI-shaped)
-
-A green local run is not evidence the tier passes: reproduce each claim in the environment CI uses. Three failures this class hides, all seen in one slice:
-
-- **Cache masking.** A result that is cached is never recomputed, so a change to a file the config reads (a ledger, a policy JSON) can pass a tier that would have refused to load it. If config-time validation is part of the claim, declare that file a turbo global dependency and watch the tier go red on purpose.
-- **Inherited runner environment.** A test that spawns a nested runner must strip runner-only variables (e.g. `GITHUB_STEP_SUMMARY`) *after* spreading `process.env`, or the nested run writes its report to the job summary instead of the stdout the test asserts on. Also: prove env-var behaviour by faking the CI variables locally, not by reasoning about them.
-- **Ordering the build graph does not guarantee.** A package whose own tests or fixtures import it by name needs its own `build` in `dependsOn`, not just `^build` — a warm tree hides that on the developer's machine.
-
-Prefer a proof that lives in the repo (fixture specs + a test that checks exit codes, counts and output) over a throwaway commit, and use the throwaway commit only for what CI alone can show, reverting it right after.
+Temporarily restore the old behavior of the exact function under test, run the new test, and confirm it FAILS; then restore the fix and confirm it passes. A regression test that passes with and without the fix proves nothing. When the claim depends on caching, a nested test runner, or build-graph ordering, a green local run is not evidence — see `references/ci-shaped-proof.md` (cache masking, inherited runner env vars, missing build dependencies). Done when the test demonstrably fails on pre-fix code in the environment CI uses.
 
 ### 7. Run repository quality gates, then open the PR immediately
 
-Run the formatter, lint, typecheck, and the repo's canonical test entrypoint on affected areas; use `requesting-code-review` on the diff. Then push and open the PR right away — the PR is what dispatches CI, and CI latency is the long pole; do not sit on finished work. Load `github-pr-workflow` for PR mechanics: conventional branch/commit, body linking the issue with problem, approach, tests, risk, and exclusions. Read the PR back and verify head SHA, base, title, and files. Done when the PR exists with the intended diff and CI is running.
+Run the formatter, lint, typecheck, and the repo's canonical test entrypoint on affected areas; review the diff yourself (or with a second agent) before pushing. Then push and open the PR right away — the PR is what dispatches CI, and CI latency is the long pole; do not sit on finished work. Use a conventional branch name and commit message, and a PR body linking the issue with problem, approach, tests, risk, and exclusions. Read the PR back and verify head SHA, base, title, and files. Done when the PR exists with the intended diff and CI is running.
 
 ### 8. Shepherd CI honestly and close the loop
 

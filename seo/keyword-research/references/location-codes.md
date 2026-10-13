@@ -52,7 +52,8 @@ For country-level codes, filter location_type == 'Country'.
 Before trusting a country code, pull a SERP for a query whose top domains reveal the country, then check the TLDs:
 
 ```typescript
-const r = await tools['openseo-so.profiles.<PROFILE>.get_serp_results']({
+// A and B as defined in seo-report/references/openseo-access.md; depth 10 is enough to read TLDs
+const r = await tools[B + 'get_serp_results']({
   accountId: A,
   input: { projectId: PID, queries: [{ keyword: 'car insurance', locationCode: 2826, languageCode: 'en' }], depth: 10 },
 });

@@ -18,7 +18,7 @@ Install everything, interactively pick agent targets:
 
 Install a specific skill only:
 
-    npx skills add 0xZ0uk/skills --skill blender-fps-rigging
+    npx skills add 0xZ0uk/skills --skill safe-git-sync
 
 Install several skills at once, all agents, no prompts:
 
@@ -88,12 +88,18 @@ Clone and copy the categories/skills you want into your skills directory:
 
 ## Contents
 
-- **devops/dokploy-deploy** — deploying services on Dokploy (dash.blugg.pt): API quirks, compose pitfalls, GHCR pull fix
-- **devops/proxmox-homelab-ops** — operating the Proxmox host (pve)
-- **engineering/agent-router** — T3 Code orchestrator discipline: route agents to Opus 5.5 / Sonnet 5.5 / Pi GLM-5.3-flash by decision density, escalate on signals not vibes
-- **game-dev/blender-fps-rigging** — rig/skin FPS arms & guns in Blender, animate idle/walk/fire/reload, FBX export to Unity/UE5 (source: David Stenfors' 25-part course)
-- **github/** — gh CLI workflows: auth, PRs, issues, repo management, code review, safe-git-sync
-- **seo/** — seo-audit, seo-report, keyword-research, competitor-analysis (Porta443 SEO pipeline)
+- **devops/dokploy-deploy** — deploying and operating services on the homelab Dokploy (LXC 100) via its REST API; per-app notes in `references/apps/`
+- **devops/proxmox-homelab-ops** — general Proxmox VE host operations: memory budgeting, backups, firewall with dead-man rollback, thin pools, storage, updates
+- **engineering/agent-router** — route spawned agents to the right model tier (Opus / Sonnet / Pi + GLM) by decision count
+- **github/github-auth** — detect and set up GitHub auth for git and gh, including headless device-flow login
+- **github/github-gh-pitfalls** — gh CLI / GitHub API traps and workarounds, cross-fork porting
+- **github/github-issue-to-pr** — carry an issue to a verified PR with honest CI state
+- **github/safe-git-sync** — fetch, review and integrate upstream changes without damaging local work
+- **seo/** — seo-audit, keyword-research, competitor-analysis, and seo-report (delivery + shared OpenSEO access notes; the other three depend on it)
+
+## Agent compatibility
+
+Written for Hermes, but tool-neutral where possible, so they also work in Claude Code, Cursor, etc. Hermes-specific parts: `$HERMES_HOME` fallbacks in `github-auth`, the Executor MCP route in the SEO skills, and homelab-specific IPs, IDs and paths in `dokploy-deploy`.
 
 ## Repo layout
 

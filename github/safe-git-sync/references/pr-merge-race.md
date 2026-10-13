@@ -16,7 +16,7 @@ A commit was pushed to a feature branch moments before the PR merged. GitHub's P
 3. Inspect the PR object separately:
    - `gh pr view <number> --json state,mergedAt,mergeCommit,headRefOid,headRefName`
    - `gh api repos/<owner>/<repo>/pulls/<number>/commits`
-4. If the PR merged before the final push landed, cherry-pick the missing commit onto fresh `main` and open a follow-up PR.
+4. If the PR merged before the final push landed, cherry-pick the missing commit onto a fresh copy of the base branch and open a follow-up PR.
 
 ## Rule
 

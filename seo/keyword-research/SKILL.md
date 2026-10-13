@@ -1,109 +1,62 @@
 ---
 name: keyword-research
-description: "Discover keyword opportunities, evaluate metrics and SERPs, and save/tag promising terms."
+description: "Discover and prioritize keyword opportunities with OpenSEO: start from Search Console striking-distance queries, expand seeds, hydrate volume/KD/intent/CPC, check SERPs, and save/tag the chosen terms. Use when the user asks for keyword research, keyword ideas, what to target or write about, search demand for a topic, or local/market-specific keyword volumes."
 ---
 
 # OpenSEO Keyword Research
 
 ## Goal
 
-Turn seed topics into a prioritized keyword opportunity set using OpenSEO MCP data. The output should help the user decide what to target, what to save, and what to research next.
+Turn seed topics into a prioritized keyword opportunity set using OpenSEO data. The output should help the user decide what to target, what to save, and what to research next.
 
-## Required inputs
+## Setup
 
-- `projectId`
-- One or more seed topics, products, pages, competitors, or audience problems
-- Optional market/location/language
+- **Load `seo-report` first.** Its `references/openseo-access.md` has the Executor call shape, account constants, and the project-context rules (read context first, fill missing fields inline, reuse research under 30 days old, research-log length cap). Delivery goes through it too, saving with `skill: "keyword-research"`; if it is unavailable, say so and stop before writing HTML.
+- Inputs: `projectId` (`list_projects` if missing), one or more seeds (topics, products, pages, competitors, audience problems), optional market/location/language. Ask about the market only if it would materially change the metrics; otherwise use tool defaults.
+- This skill needs `business_overview` and `current_goal` in project context.
+- **Market quirks:** some locations sell only one language (Portugal is Portuguese-only), and sub-national volume needs a `locationName`. Read `references/markets.md` before researching any non-US market; country codes are in `references/location-codes.md`.
 
-If `projectId` is missing, use `list_projects` first. If the target market/location/language is unclear and would materially affect keyword metrics, ask the user; otherwise use the MCP tool defaults.
+## Tools
 
-## Project context
-
-The project-context tools are free and shared with the app and other agents.
-
-1. Call `get_project_context` first and ground the research in it — the business, the goal, the markets, and the competitors and key pages already saved.
-2. This skill needs `business_overview` and `current_goal`. If either is empty, run a minimal inline setup: ask the user, or infer from the site and confirm, just enough to fill them, write them back with `update_project_context`, then continue the research. Never front-load the full interview; suggest `seo-project-setup` at the end for the rest.
-3. Before spending credits, check the research log. If the same research ran within the last 30 days, reuse that result and say so instead of re-buying it.
-4. On finish, write back what is durable — a sharpened `business_overview` or `current_goal`, competitors that kept appearing in the SERPs via `addCompetitors`, pages the keywords should land on via `addKeyPages` — and append a research log entry: `{ appendResearchLog: { summary: "Keyword research: <seeds/market>. Verdict: <conclusion>" } }`.
-
-## Deliver as a report
-
-Deliver through the `seo-report` skill, saving with `skill: "keyword-research"`. If that skill is not available, say so and stop before writing HTML.
-
-## OpenSEO access (through Executor)
-
-Call these inside the Executor MCP (`mcp__executor__execute`), prefix
-`openseo-so.profiles.ins_140ec4c7-3799-4b0d-9802-0d565f87ff7c.`,
-`accountId: acc_0b91f591-6feb-4f77-b31b-be43e921b826`. Never add OpenSEO as a direct MCP server.
-
-- `research_keywords`: primary discovery tool. Use 1-5 seeds per call and prefer 150 results unless the user asks for exhaustive research. COST ~54 credits per seed at that limit — for a topic you can already name, skip it and hydrate your own keyword list with `get_keyword_metrics` instead (1-700 keywords in one call, far cheaper).
-
-### Market/language constraint (verified 2026-10-03)
-
-The Portugal market (location 2620) sells **Portuguese only**. English seeds return
-`Language 'en' is not available for this location. Available: pt.` on `research_keywords`,
-`find_serp_competitors` AND `get_keyword_metrics` — all three. Failed seeds cost no credits.
-
-- For a Portugal-based business targeting English speakers, hydrate the same keyword list against the
-  buyer's home market (`2826` UK, `2840` US, `2803` Ireland) and label the figures as a demand proxy:
-  they measure where the buyers search from, not where the property is.
-- Expect international long-tail to look tiny per country (UK returned 10/mo for "property management
-  Portugal" and 0 for "property management Silver Coast"). Low per-country volume on an international
-  service is a data artifact, not proof of no demand — say so instead of reporting "no demand" flatly.
-- Pull the local-language cluster too (`locationCode: 2620, languageCode: 'pt'`); for Portugal that is
-  where measurable service demand actually sits. Do not enter Portuguese terms unaccented if it can be
-  avoided — accents affect matching and volume. For demand in one city, county, or region, call `search_serp_locations` and pass the returned `locationName` on the seed: volume, CPC, and competition become local; keyword ideas, KD, and intent stay national.
-- `get_keyword_metrics`: hydrate up to 700 known keywords with volume, keyword difficulty (KD), search intent, CPC, and monthly trends in one call. Use it to score candidate or known terms — including the Search Console striking-distance queries from step 1.
-- `get_ranked_keywords`: pull exact ranking keyword rows when a target domain or page is part of the research brief.
-- `get_search_console_performance`: when Search Console is connected, start from the project's real first-party demand — queries already earning impressions and near-ranking ("striking distance") terms. Pass `minPosition: 5, maxPosition: 20, minImpressions: 50` so the server filters the striking-distance rows for you (Google sorts by clicks and can't filter by position itself). Then hydrate those striking-distance queries with `get_keyword_metrics` to attach difficulty and intent.
-- `get_serp_results`: inspect SERPs for the top candidate terms, especially when intent is ambiguous. Pass the same `locationName` for the SERP in one city, county, or region.
-- `search_local_businesses`, `get_local_serp_results`, and `get_google_business_questions`: use for local SEO topics when a business/location radius matters.
-- `list_saved_keywords`: avoid duplicating already-saved work or use existing tags as context.
-- `save_keywords`: save selected keywords only after explicit user confirmation.
-- `search_serp_locations`: resolves location codes; takes `{ countryCode: 'GB', query: 'London' }` and returns rows like `London,England,United Kingdom (City, 1006886)`. It lists cities and municipalities only, never a country-level row — for country codes use `references/location-codes.md` in this skill.
-- `depth` on `get_serp_results` must be a positive multiple of 10: `depth: 5` fails validation.
-
-## Project context write limits (verified 2026-10-03)
-
-`appendResearchLog` summaries are length-capped. A ~1,400-character entry is rejected with a confusing `anyOf` / `Failed the "false" constraint` validation error that reads like a schema bug; ~730 characters passes. Keep research-log entries under about 1,000 characters and put the detail in the report.
+| Tool | Use | Cost / limits |
+|---|---|---|
+| `get_search_console_performance` | First-party demand when connected. Pass `minPosition: 5, maxPosition: 20, minImpressions: 50` to get striking-distance rows (Google itself can't filter by position). | free |
+| `get_keyword_metrics` | Hydrate up to 700 known keywords with volume, KD, intent, CPC, monthly trends in one call. | far cheaper than discovery |
+| `research_keywords` | Discovery from 1–5 seeds; prefer 150 results unless exhaustive research is asked for. | ~54 credits per seed at 150 — for terms you can already name, use `get_keyword_metrics` instead |
+| `get_ranked_keywords` | Exact ranking rows when a domain/page is in the brief. | |
+| `get_serp_results` | SERPs for top or ambiguous candidates. | `depth` must be a positive multiple of 10 (`5` fails validation) |
+| `search_local_businesses`, `get_local_serp_results`, `get_google_business_questions` | Local SEO when a business location or radius matters. | |
+| `search_serp_locations` | Resolve city/region `locationName`s. | cities only, no country rows |
+| `list_saved_keywords` / `save_keywords` | Avoid duplicating saved work / save chosen terms. | save only after explicit confirmation |
 
 ## Workflow
 
-1. Normalize seeds into a small set of distinct research angles. If Search Console is connected for the project, first pull `get_search_console_performance` with `minPosition: 5, maxPosition: 20, minImpressions: 50` (default lookback), and hydrate those queries with `get_keyword_metrics` to attach KD and intent. That ranked, hydrated list is your fastest opportunity set — work it before broad discovery.
-2. If the request is local SEO, identify the business, location/coordinates or service area, and local categories. Research local volume for that city or county with `research_keywords` and `locationName`. Use `search_local_businesses` and `get_local_serp_results` for the most important location/keyword set instead of relying only on national keyword/SERP data.
-3. Call `research_keywords` for exploratory seeds. Use bulk calls when possible.
-4. Use `get_keyword_metrics` to hydrate a fixed keyword list — or the striking-distance queries from step 1 — with volume, KD, and intent before prioritizing.
-5. Use `get_ranked_keywords` when the user provides a domain/page and wants opportunities based on current rankings, near-misses, or competitor-owned terms.
+1. Normalize seeds into a small set of distinct research angles. If Search Console is connected, pull striking-distance queries first and hydrate them with `get_keyword_metrics` — that ranked, hydrated list is the fastest opportunity set; work it before broad discovery.
+2. For local SEO, identify the business, location or service area, and local categories; research local volume with `locationName`, and use the local business/SERP tools for the key location/keyword set instead of relying on national data.
+3. `research_keywords` for exploratory seeds, bulked where possible.
+4. `get_keyword_metrics` to hydrate any fixed list before prioritizing.
+5. `get_ranked_keywords` when the user gives a domain/page and wants opportunities from current rankings, near-misses, or competitor-owned terms.
 6. Remove irrelevant, duplicate, branded-only, and off-intent terms.
-7. Prioritize by practical opportunity, not volume alone:
-   - Strong match to the user's product/page/topic
-   - Clear search intent
-   - Reasonable difficulty
-   - Useful volume/CPC signal
-   - SERP where the user can plausibly compete
-   - For local SEO, local-pack/Maps visibility and proximity fit
-8. Use `get_serp_results` for high-potential or ambiguous keywords when SERP intent would change the recommendation; keep the default check small.
+7. Prioritize by practical opportunity, not volume alone: product/page fit, clear intent, reasonable difficulty, useful volume/CPC, a SERP the user can plausibly compete in, and for local SEO, local-pack proximity fit.
+8. `get_serp_results` for high-potential or ambiguous terms when intent would change the recommendation; keep this check small.
 9. Present a shortlist and a longer opportunity table.
-10. Ask before saving keywords. When saving, suggest concise tags such as `topic:<topic>`, `intent:<intent>`, or `page:<slug>`.
+10. Ask before saving. Suggest concise tags: `topic:<topic>`, `intent:<intent>`, `page:<slug>`.
+11. Write back durable context: a sharpened `business_overview`/`current_goal`, competitors that kept appearing (`addCompetitors`), landing pages (`addKeyPages`), and a research-log line `Keyword research: <seeds/market>. Verdict: <conclusion>`.
 
 ## Output format
 
-`h1`: the site or topic.
+`h1`: the site or topic. If a report template applies (see `seo-report`), its sections and tone replace this list.
 
-If a report template applies (see `seo-report`), its sections and tone replace this list.
-
-Sections in this order:
-
-1. **The opportunity** — one or two opening sentences naming the best theme and why the site can win it now.
-2. **Target these now** — a table of keyword, intent, volume, KD, CPC, and the page to make. Add a bar chart comparing the volumes of the shortlist.
+1. **The opportunity** — two or three bullets: the best theme, and why the site can win it now.
+2. **Target these now** — table of keyword, intent, volume, KD, CPC, and the page to make, plus a bar chart of shortlist volumes.
 3. **Why these** — one finding per keyword that needs justifying: the SERP or metric evidence, then the page to build.
-4. **The longer opportunity list** — a second table, same columns.
-5. **Risks and caveats** — notes: SERP intent that would change the recommendation, missing metrics written as `unknown`, close-variant volumes that are one bucket rather than several.
-6. **What to do next** — an ordered list, including whether to run keyword clustering, write a content brief, or save the chosen keywords.
-7. **How this report was made** — opens with the skill link line from `seo-report`, pointing at `https://openseo.so/docs/skills/keyword-research` ("OpenSEO Keyword Research skill"), then which tools returned what.
+4. **The longer opportunity list** — second table, same columns.
+5. **Risks and caveats** — SERP intent that would change the recommendation, missing metrics written as `unknown`, close-variant volumes that are one bucket rather than several, demand-proxy markets.
+6. **What to do next** — ordered list: keyword clustering, a content brief, or saving the chosen keywords.
+7. **How this report was made** — the skill link line from `seo-report` pointing at `https://openseo.so/docs/skills/keyword-research` ("OpenSEO Keyword Research skill"), then which tools returned what.
 
 ## Guardrails
 
 - Do not invent metrics. If OpenSEO does not return a value, write `unknown`.
 - Do not call `save_keywords` without explicit confirmation.
-- Prefer business-fit and intent-fit over chasing the largest volume term.
+- Prefer business-fit and intent-fit over the largest volume term.

@@ -1,6 +1,6 @@
 ---
 name: competitor-analysis
-description: "Analyze one competitor's organic footprint, ranking keywords, content themes, backlinks, and gaps."
+description: "Analyze one named competitor's organic search footprint with OpenSEO: traffic and keyword estimates, ranking keywords grouped into themes, backlinks, local-pack presence, head-to-head SERPs, and where they are vulnerable. Use when the user names a competitor domain and asks how it ranks, what to learn from or counter, or how their own site compares."
 ---
 
 # OpenSEO Competitor Analysis
@@ -9,7 +9,7 @@ description: "Analyze one competitor's organic footprint, ranking keywords, cont
 
 Analyze one competitor deeply enough to decide what to learn from, avoid, counter-position against, or outrank.
 
-Use this for a named competitor. For identifying the market leaders first, use `competitive-landscape`.
+Use this for a named competitor. If the user doesn't know who their search competitors are, run `find_serp_competitors` over their target keywords first and confirm the pick.
 
 ## Required inputs
 
@@ -18,24 +18,13 @@ Use this for a named competitor. For identifying the market leaders first, use `
 - User's domain when comparison is requested
 - Optional topic/category/location/language
 
-## Project context
+## Setup
 
-The project-context tools are free and shared with the app and other agents.
+- **Load `seo-report` first.** Its `references/openseo-access.md` has the Executor call shape, account constants, and the project-context rules (read context first, fill missing fields inline, reuse research under 30 days old, research-log length cap). Delivery goes through it too, saving with `skill: "competitor-analysis"`; if it is unavailable, say so and stop before writing HTML.
+- This skill needs saved competitors. If none exist, save the one being analyzed, ask (or infer with `find_serp_competitors` and confirm) whether there are others, and write them back with `update_project_context` (`addCompetitors`).
+- On finish, upsert this domain via `addCompetitors` with a short note on its strengths and where it is vulnerable, and log `Competitor analysis: <domain>. Verdict: <conclusion>`.
 
-1. Call `get_project_context` first and ground the analysis in it — the saved competitors say whether this domain is already known and what was concluded about it before.
-2. This skill needs competitors. If none are saved, run a minimal inline setup: save the competitor being analyzed, and ask the user (or infer from `find_serp_competitors` and confirm) whether there are others, write them back with `update_project_context` (`addCompetitors`), then continue the analysis. Never front-load the full interview; suggest `seo-project-setup` at the end for the rest.
-3. Before spending credits, check the research log. If the same research ran within the last 30 days, reuse that result and say so instead of re-buying it.
-4. On finish, write back what is durable with `update_project_context` — an `addCompetitors` upsert for this domain with a short note on its strengths and where it is vulnerable — and append a research log entry: `{ appendResearchLog: { summary: "Competitor analysis: <domain>. Verdict: <conclusion>" } }`.
-
-## Deliver as a report
-
-Deliver through the `seo-report` skill, saving with `skill: "competitor-analysis"`. If that skill is not available, say so and stop before writing HTML.
-
-## OpenSEO access (through Executor)
-
-Call these through the Executor MCP (`mcp__executor__execute`), prefix
-`openseo-so.profiles.ins_140ec4c7-3799-4b0d-9802-0d565f87ff7c.`,
-`accountId: acc_0b91f591-6feb-4f77-b31b-be43e921b826`. Never add OpenSEO as a direct MCP server.
+## Tools
 
 - `get_domain_overview`: baseline organic traffic and keyword count.
 - `get_search_console_performance`: when comparing to the user's own domain and Search Console is connected, use it as the first-party baseline (real clicks/impressions/CTR/position) instead of estimating the user's own performance from third-party data.
@@ -77,7 +66,7 @@ If a report template applies (see `seo-report`), its sections and tone replace t
 
 Sections in this order:
 
-1. **Snapshot** — one or two opening sentences, then a table of the competitor's organic footprint (traffic estimate, keyword count, referring domains). Add the user's domain as a second row when comparing.
+1. **Snapshot** — two or three bullets (the verdict, one fact per line), then a table of the competitor's organic footprint (traffic estimate, keyword count, referring domains). Add the user's domain as a second row when comparing.
 2. **The biggest lesson** — one finding.
 3. **Where they are vulnerable** — one finding per opening, ordered by how winnable it is.
 4. **Keyword themes** — a table of theme, example keywords, volume, and whether the user competes there. A bar chart when a few themes dominate the footprint.

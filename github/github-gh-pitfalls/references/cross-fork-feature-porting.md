@@ -4,38 +4,30 @@ Pattern for porting a feature from an upstream repository to a diverged fork, wh
 
 ## Remote Setup
 
-After forking the repo to your account, set up three remotes:
+Starting from a clone of the intermediate fork (its remote is `origin`), after forking it to your account:
 
 ```bash
-# Origin = your fork (where you push changes)
-git remote rename origin origin-forked
-git remote add origin git@github.com:YOUR_USER/repo.git
+# The fork you cloned from becomes upstream-fork
+git remote rename origin upstream-fork
 
-# The fork you cloned from (if different from upstream canonical)
-git remote add upstream-fork https://github.com/OTHER_USER/repo.git
+# Your own fork is where you push
+git remote add origin git@github.com:YOUR_USER/repo.git
 
 # The original canonical upstream (where the feature lives)
 git remote add upstream-original https://github.com/CANONICAL_OWNER/repo.git
-```
 
-Fetch all remotes:
-```bash
 git fetch --all
-```
-
-Verify:
-```bash
 git remote -v
-# origin          git@github.com:YOUR_USER/repo.git (fetch/push)
-# upstream-fork   https://github.com/OTHER_USER/repo.git (fetch/push)
-# upstream-original https://github.com/CANONICAL_OWNER/repo.git (fetch/push)
+# origin             git@github.com:YOUR_USER/repo.git
+# upstream-fork      https://github.com/OTHER_USER/repo.git
+# upstream-original  https://github.com/CANONICAL_OWNER/repo.git
 ```
 
 ## Porting Workflow
 
 1. **Create a feature branch** off the fork's main:
    ```bash
-   git checkout -b feat/my-feature-port
+   git switch -c feat/my-feature-port upstream-fork/main
    ```
 
 2. **Read upstream implementation files** from the canonical repo:
@@ -80,6 +72,8 @@ git remote -v
 
 ## Pitfalls
 
+The first is general; the last two come from one port (an LLM-gateway fork) and are examples of what to check, not universal rules.
+
 ### Source-Level Redaction (`***` pattern)
 
 Some repos display `***` and `getUni...ey()` in their source code. This is **display-only redaction** — the actual git source has real variable names. Verify with `hexdump -C` or `sed` when in doubt:
@@ -89,7 +83,7 @@ git show HEAD:path/to/file.ts | sed -n '100p' | hexdump -C
 # Will show actual variable name (e.g., "decryptedKey") not "***"
 ```
 
-### Database Re-initialization
+### Example: database re-initialization
 
 Running a script that calls `initDb()` or importing the database module directly will **wipe existing data** (API keys, custom providers, settings). The models survive (they're baked into migrations), but operational data is lost. Always use the running server's API to read/write configuration:
 
@@ -100,7 +94,7 @@ curl -s http://localhost:PORT/api/settings/api-key
 # DON'T run scripts that call initDb() on a production DB
 ```
 
-### Diverged Router Signatures
+### Example: diverged router signatures
 
 A fork may have evolved its router API significantly (added fields like `release`, `maxOutputTokens`, parallel-request gating, sticky-session support). When porting a feature that calls `routePinnedModel` or `routeRequest`, verify:
 
