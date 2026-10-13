@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [GitHub, Issues, Coding, Pull-Requests, CI]
-    related_skills: [github-auth, github-gh-pitfalls, safe-git-sync]
+    related_skills: [github-auth, github-gh-pitfalls, safe-git-sync, isolated-worktree, verification, before-and-after]
 ---
 
 # GitHub Issue to Pull Request
@@ -43,7 +43,7 @@ List acceptance criteria, interfaces, migrations/state changes, compatibility, s
 
 ### 5. Implement the smallest complete change — and fix the class
 
-Work on an isolated branch or worktree. Add regression tests first, then implement. When the fix is in hand, search for the same bug shape at sibling call sites and fix the whole class in this PR — an incomplete fix that leaves known siblings broken is worse than none. Every changed line must trace to the issue; no drive-by cleanup. Done when targeted tests pass, the original failure no longer reproduces, and sibling sites are fixed or explicitly ruled out.
+Work in an isolated worktree (`isolated-worktree`); if the change is user-visible, capture its "before" first (`verification`, "Before you touch code"). Add regression tests first, then implement. When the fix is in hand, search for the same bug shape at sibling call sites and fix the whole class in this PR — an incomplete fix that leaves known siblings broken is worse than none. Every changed line must trace to the issue; no drive-by cleanup. Done when targeted tests pass, the original failure no longer reproduces, and sibling sites are fixed or explicitly ruled out.
 
 ### 6. Prove the regression test bites — locally and where CI runs
 
@@ -51,7 +51,7 @@ Temporarily restore the old behavior of the exact function under test, run the n
 
 ### 7. Run repository quality gates, then open the PR immediately
 
-Run the formatter, lint, typecheck, and the repo's canonical test entrypoint on affected areas; review the diff yourself (or with a second agent) before pushing. Then push and open the PR right away — the PR is what dispatches CI, and CI latency is the long pole; do not sit on finished work. Use a conventional branch name and commit message, and a PR body linking the issue with problem, approach, tests, risk, and exclusions. Read the PR back and verify head SHA, base, title, and files. Done when the PR exists with the intended diff and CI is running.
+Run the formatter, lint, typecheck, and the repo's canonical test entrypoint on affected areas, plus the `verification` gate for user-visible behavior; review the diff yourself (or with a second agent) before pushing. Then push and open the PR right away — the PR is what dispatches CI, and CI latency is the long pole; do not sit on finished work. Use a conventional branch name and commit message, and a PR body linking the issue with problem, approach, tests, risk, and exclusions. For a visible change, add the before/after pair with `before-and-after`. Read the PR back and verify head SHA, base, title, and files. Done when the PR exists with the intended diff and CI is running.
 
 ### 8. Shepherd CI honestly and close the loop
 

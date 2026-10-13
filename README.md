@@ -107,17 +107,20 @@ The three SEO skills spend OpenSEO credits.
 - **devops/proxmox-homelab-ops** — general Proxmox VE host operations: memory budgeting, backups, firewall with dead-man rollback, thin pools, storage, updates
 - **engineering/agent-router** — route spawned agents to the right model tier (Opus / Sonnet / Pi + GLM) by decision count
 - **engineering/diagnosing-bugs** — disciplined loop for hard bugs and performance regressions: reproduce, minimise, hypothesise, instrument, fix, regression-test
+- **engineering/verification** — generate a per-app verify skill, then gate every change on captured before/after evidence
 - **engineering/two-axis-review** — review a diff against the repo's coding standards and against its spec, as two separate passes
 - **engineering/codebase-design** — *building block:* vocabulary and discipline for designing deep modules
 - **github/github-auth** — *building block:* detect and set up GitHub auth for git and gh, including headless device-flow login
 - **github/github-gh-pitfalls** — gh CLI / GitHub API traps and workarounds, cross-fork porting
 - **github/github-issue-to-pr** — carry an issue to a verified PR with honest CI state
+- **github/isolated-worktree** — start each task in its own worktree and branch off the default branch, so parallel agents don't collide
+- **github/before-and-after** — put before/after screenshots into a PR body, uploaded through GitHub (`gh --attach`), never a public host
 - **github/safe-git-sync** — fetch, review and integrate upstream changes without damaging local work
 - **seo/seo-report** — *building block:* report format and shared OpenSEO access notes; the three SEO skills above load it
 - **productivity/grilling** — *building block:* interview the user about a plan until every branch of the decision tree is resolved
 - **productivity/writing-for-agents** — how to write skills, AGENTS.md/CLAUDE.md, and other docs agents read
 
-The engineering and productivity skills above (except agent-router) are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, see `THIRD_PARTY_LICENSE-mattpocock-skills.txt`); [AGENTS.md](AGENTS.md) lists what changed.
+`verification`, `isolated-worktree` and `before-and-after` come from the porta443-skills OpenCode setup; `before-and-after` adapts [vercel-labs/before-and-after](https://github.com/vercel-labs/before-and-after) (PolyForm Shield 1.0.0, licence in the skill folder). The other engineering and productivity skills above (except agent-router) are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, see `THIRD_PARTY_LICENSE-mattpocock-skills.txt`); [AGENTS.md](AGENTS.md) lists what changed.
 
 Claude Code honours the user-invoked flag (`disable-model-invocation: true`). Hermes doesn't, so those skills also carry a guard line telling the agent to run them only on an explicit request.
 
