@@ -1,15 +1,18 @@
 ---
 name: seo-audit
-description: "Audit a website's SEO with OpenSEO: crawl it, read its page families, run live ranking checks, and deliver a short data-backed report on the one to three changes most likely to grow organic traffic that converts. Use when asked for an SEO audit, site review, why a site isn't ranking, or what to fix first for organic growth — especially for a shareable, non-expert report."
+description: "Audit a website's SEO with OpenSEO and save a short report on the one to three changes most likely to grow organic traffic that converts."
+disable-model-invocation: true
 ---
 
 # OpenSEO SEO Audit
+
+**Spends OpenSEO credits.** Run only when the user explicitly asked for this (e.g. typed `/seo-audit`); if you only suspect it would help, suggest it instead.
 
 ## Goal
 
 Find the work that would most improve a site's useful organic traffic, then explain it so a non-expert can act on it. Research broadly; recommend selectively. The report leads with one to three recommendations that either capture meaningfully more qualified search demand or stop a real loss.
 
-Use this when asked for an SEO audit or review of a domain, especially for a shareable report. For expert-facing analysis of a named competitor, use `competitor-analysis` instead.
+For expert-facing analysis of one named competitor, suggest the user run `/competitor-analysis` instead (it is user-invoked, so don't run it yourself).
 
 ## Inputs and project context
 

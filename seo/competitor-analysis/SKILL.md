@@ -1,9 +1,12 @@
 ---
 name: competitor-analysis
-description: "Analyze one named competitor's organic search footprint with OpenSEO: traffic and keyword estimates, ranking keywords grouped into themes, backlinks, local-pack presence, head-to-head SERPs, and where they are vulnerable. Use when the user names a competitor domain and asks how it ranks, what to learn from or counter, or how their own site compares."
+description: "Analyze one competitor's organic search footprint with OpenSEO: what ranks, where it's vulnerable, and how your site compares."
+disable-model-invocation: true
 ---
 
 # OpenSEO Competitor Analysis
+
+**Spends OpenSEO credits.** Run only when the user explicitly asked for this (e.g. typed `/competitor-analysis`); if you only suspect it would help, suggest it instead.
 
 ## Goal
 

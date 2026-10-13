@@ -88,14 +88,38 @@ Clone and copy the categories/skills you want into your skills directory:
 
 ## Contents
 
+Skills are either **user-invoked** (run only when you ask, e.g. `/seo-audit`) or **model-invoked** (the agent reaches for them when the task fits). Conventions for writing and changing skills: [AGENTS.md](AGENTS.md).
+
+**User-invoked**
+
+- **seo/seo-audit** — audit a site and report the one to three changes most likely to grow organic traffic
+- **seo/keyword-research** — find and prioritize keyword opportunities for a site or topic
+- **seo/competitor-analysis** — analyze one competitor's organic footprint and where it's vulnerable
+- **engineering/to-spec** — turn the current conversation into a spec and publish it as a GitHub issue
+- **engineering/to-tickets** — break a plan or spec into dependency-ordered GitHub issues
+- **engineering/improve-codebase-architecture** — survey a codebase for deepening opportunities and present them as an HTML report
+
+The three SEO skills spend OpenSEO credits.
+
+**Model-invoked**
+
 - **devops/dokploy-deploy** — deploying and operating services on the homelab Dokploy (LXC 100) via its REST API; per-app notes in `references/apps/`
 - **devops/proxmox-homelab-ops** — general Proxmox VE host operations: memory budgeting, backups, firewall with dead-man rollback, thin pools, storage, updates
 - **engineering/agent-router** — route spawned agents to the right model tier (Opus / Sonnet / Pi + GLM) by decision count
-- **github/github-auth** — detect and set up GitHub auth for git and gh, including headless device-flow login
+- **engineering/diagnosing-bugs** — disciplined loop for hard bugs and performance regressions: reproduce, minimise, hypothesise, instrument, fix, regression-test
+- **engineering/two-axis-review** — review a diff against the repo's coding standards and against its spec, as two separate passes
+- **engineering/codebase-design** — *building block:* vocabulary and discipline for designing deep modules
+- **github/github-auth** — *building block:* detect and set up GitHub auth for git and gh, including headless device-flow login
 - **github/github-gh-pitfalls** — gh CLI / GitHub API traps and workarounds, cross-fork porting
 - **github/github-issue-to-pr** — carry an issue to a verified PR with honest CI state
 - **github/safe-git-sync** — fetch, review and integrate upstream changes without damaging local work
-- **seo/** — seo-audit, keyword-research, competitor-analysis, and seo-report (delivery + shared OpenSEO access notes; the other three depend on it)
+- **seo/seo-report** — *building block:* report format and shared OpenSEO access notes; the three SEO skills above load it
+- **productivity/grilling** — *building block:* interview the user about a plan until every branch of the decision tree is resolved
+- **productivity/writing-for-agents** — how to write skills, AGENTS.md/CLAUDE.md, and other docs agents read
+
+The engineering and productivity skills above (except agent-router) are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, see `THIRD_PARTY_LICENSE-mattpocock-skills.txt`); [AGENTS.md](AGENTS.md) lists what changed.
+
+Claude Code honours the user-invoked flag (`disable-model-invocation: true`). Hermes doesn't, so those skills also carry a guard line telling the agent to run them only on an explicit request.
 
 ## Agent compatibility
 

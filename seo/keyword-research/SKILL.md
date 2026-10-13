@@ -1,9 +1,12 @@
 ---
 name: keyword-research
-description: "Discover and prioritize keyword opportunities with OpenSEO: start from Search Console striking-distance queries, expand seeds, hydrate volume/KD/intent/CPC, check SERPs, and save/tag the chosen terms. Use when the user asks for keyword research, keyword ideas, what to target or write about, search demand for a topic, or local/market-specific keyword volumes."
+description: "Find and prioritize keyword opportunities for a site or topic with OpenSEO, and save the chosen terms on request."
+disable-model-invocation: true
 ---
 
 # OpenSEO Keyword Research
+
+**Spends OpenSEO credits.** Run only when the user explicitly asked for this (e.g. typed `/keyword-research`); if you only suspect it would help, suggest it instead.
 
 ## Goal
 
