@@ -98,6 +98,11 @@ Skills are either **user-invoked** (run only when you ask, e.g. `/seo-audit`) or
 - **engineering/to-spec** — turn the current conversation into a spec and publish it as a GitHub issue
 - **engineering/to-tickets** — break a plan or spec into dependency-ordered GitHub issues
 - **engineering/improve-codebase-architecture** — survey a codebase for deepening opportunities and present them as an HTML report
+- **frontend/interface-review** — review a branch, PR or uncommitted change for the interface problems it introduced or regressed
+- **frontend/explain-interface** — explain how a website, visual effect or animation was built, from a live URL or a screenshot
+- **frontend/break** — render one component under every scenario that can reach it on a throwaway page, to stress-test it
+- **frontend/state-machine** — render every state of one component on a throwaway page, with mock data and a switcher
+- **frontend/variant** — build several variants of a component side by side and help pick one
 
 The three SEO skills spend OpenSEO credits.
 
@@ -110,6 +115,14 @@ The three SEO skills spend OpenSEO credits.
 - **engineering/verification** — generate a per-app verify skill, then gate every change on captured before/after evidence
 - **engineering/two-axis-review** — review a diff against the repo's coding standards and against its spec, as two separate passes
 - **engineering/codebase-design** — *building block:* vocabulary and discipline for designing deep modules
+- **frontend/better-interface** — one review across accessibility, layout, writing, typography, color and UI polish; owns severity, the report format and the verdict the `better-*` skills share
+- **frontend/better-accessibility** — keyboard and focus, ARIA, accessible names, forms, screen-reader announcements, motion and zoom, against WCAG 2.2
+- **frontend/better-colors** — build and check a color system: palettes, semantic tokens, formats and gamut, contrast
+- **frontend/better-layout** — grouping, alignment, spacing, responsive structure and room for translated or mirrored text
+- **frontend/better-typography** — type scale, spacing, font features, wrapping, truncation and punctuation
+- **frontend/better-ui** — surfaces, icons and motion with exact values: radius, shadows, optical alignment, icon states, animation
+- **frontend/better-writing** — interface copy: labels, errors, empty states, confirmations, plurals and voice
+- **frontend/build-design** — build UI from a Figma file or design image with the project's existing tokens and components
 - **github/github-auth** — *building block:* detect and set up GitHub auth for git and gh, including headless device-flow login
 - **github/github-gh-pitfalls** — gh CLI / GitHub API traps and workarounds, cross-fork porting
 - **github/github-issue-to-pr** — carry an issue to a verified PR with honest CI state
@@ -121,6 +134,8 @@ The three SEO skills spend OpenSEO credits.
 - **productivity/writing-for-agents** — how to write skills, AGENTS.md/CLAUDE.md, and other docs agents read
 
 `verification`, `isolated-worktree` and `before-and-after` come from the porta443-skills OpenCode setup; `before-and-after` adapts [vercel-labs/before-and-after](https://github.com/vercel-labs/before-and-after) (PolyForm Shield 1.0.0, licence in the skill folder). The other engineering and productivity skills above (except agent-router) are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, see `THIRD_PARTY_LICENSE-mattpocock-skills.txt`); [AGENTS.md](AGENTS.md) lists what changed.
+
+The `frontend/` skills are adapted from [jakubkrehel/skills](https://github.com/jakubkrehel/skills) (MIT, see `THIRD_PARTY_LICENSE-jakubkrehel-skills.txt`); `technical-drawing` was left out.
 
 Claude Code honours the user-invoked flag (`disable-model-invocation: true`). Hermes doesn't, so those skills also carry a guard line telling the agent to run them only on an explicit request.
 

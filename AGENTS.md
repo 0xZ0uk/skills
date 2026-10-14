@@ -14,7 +14,7 @@ Every skill is one of these. Decide deliberately; it sets how the description is
 - **User-invoked**: runs only when the user asks for it (typed `/skill-name`, or an explicit request). Add `disable-model-invocation: true` to the frontmatter and keep the `description` to one human-facing line, no trigger list. Use it for skills that spend money or credits, act outward (publish, comment, deploy), or orchestrate a long flow the user should start on purpose.
   - Claude Code honours the flag. **Hermes ignores it** and still offers the skill by description, so also put a guard line at the top of the body ("Run only when the user explicitly asked for this…").
 
-Current user-invoked skills: `seo-audit`, `keyword-research`, `competitor-analysis`, `to-spec`, `to-tickets`, `improve-codebase-architecture`. Everything else is model-invoked.
+Current user-invoked skills: `seo-audit`, `keyword-research`, `competitor-analysis`, `to-spec`, `to-tickets`, `improve-codebase-architecture`, `interface-review`, `explain-interface`, `break`, `state-machine`, `variant`. Everything else is model-invoked.
 
 ## Building blocks and orchestrators
 
@@ -39,3 +39,7 @@ Current user-invoked skills: `seo-audit`, `keyword-research`, `competitor-analys
 ## When you change skills
 
 Update the README's Contents list when adding, removing or renaming a skill.
+
+## Skills adapted from jakubkrehel/skills
+
+`frontend/*` comes from [jakubkrehel/skills](https://github.com/jakubkrehel/skills) at commit `4c66b1f` (MIT, see `THIRD_PARTY_LICENSE-jakubkrehel-skills.txt`); `technical-drawing` was left out. Changes: descriptions rewritten to our "Use when…" form, Codex `agents/openai.yaml` dropped, Hermes guard lines added, supporting files moved into `references/`, the standalone report format moved from each `better-*` skill into `better-interface`'s `references/review-format.md`, and review findings fixed (scope resolution in `interface-review`, throwaway-route guards and cleanup, factual errors). Upstream's own rules still hold inside `frontend/`: each rule has one owning `better-*` skill (see the [ownership table](https://github.com/jakubkrehel/skills/blob/4c66b1f/AGENTS.md#rule-ownership) in upstream's AGENTS.md), and these texts are deliberate pairs that must change together: `variant/references/picker.md` and `state-machine/references/switcher.md`, and the throwaway-route paragraphs in `break` and `state-machine`. To pull upstream changes, diff upstream between `4c66b1f` and its current head and port what applies.
